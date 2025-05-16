@@ -1,21 +1,97 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
   <title>Discord Group Leaver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #2f3136, #1e1f22);
+      font-family: 'Inter', sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #36393f;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      font-size: 22px;
+      font-weight: 600;
+      color: #adb8ff;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      background: #202225;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: monospace;
+    }
+
+    button {
+      margin-top: 26px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #6d75ff, #5865f2);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #7d89ff, #4e57e0);
+      transform: scale(1.02);
+    }
+
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #202225;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      height: 100px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
   <div class="card">
     <h2>Discord Group Leaver</h2>
     <form id="form">
       <label>トークン</label>
-      <input type="text" id="token" required>
+      <input id="token" type="text">
 
       <label>グループ名フィルター</label>
-      <input type="text" id="filter">
+      <input id="filter" type="text">
 
       <button type="submit">実行</button>
     </form>
