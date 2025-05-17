@@ -1,86 +1,99 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Ozeu Group Leaver</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ozeu Group Leaver</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #202225; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #5865f2; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #7289da; }
+
+    *, *::before, *::after { box-sizing: border-box; }
     body {
-      margin: 0;
-      background: linear-gradient(135deg, #2f3136, #1e1f22);
       font-family: 'Inter', sans-serif;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      background: linear-gradient(135deg,#2f3136,#1e1f22);
+      color:#fff;
+      margin:0; padding:0;
+      display:flex; justify-content:center; align-items:center;
+      height:100vh;
     }
-
     .card {
-      background: #36393f;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-      width: 100%;
-      max-width: 600px;
+      background:#36393f;
+      padding:32px;
+      border-radius:20px;
+      box-shadow:0 15px 35px rgba(0,0,0,.5);
+      width:100%; max-width:600px;
+      animation:fadeIn .8s ease;
+      overflow:auto; max-height:95vh;
     }
-
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
     h2 {
-      margin: 0 0 28px;
-      font-size: 26px;
-      font-weight: 600;
-      color: #adb8ff;
-      text-align: center;
+      color:#adb8ff;
+      text-align:center;
+      margin:0 0 24px;
+      font-weight:600;
     }
-
     label {
-      display: block;
-      margin-top: 22px;
-      font-size: 16px;
+      display:block;
+      margin-top:18px;
+      font-size:14px;
     }
 
     input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      background: #202225;
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-family: monospace;
-      font-size: 15px;
+      width:100%; padding:10px; margin-top:6px;
+      border-radius:8px; border:none;
+      background:#202225; color:#fff;
+      font-family:monospace;
     }
 
     button {
-      margin-top: 32px;
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #6d75ff, #5865f2);
-      border: none;
-      border-radius: 14px;
-      color: #fff;
-      font-weight: bold;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.2s;
+      margin-top:24px; width:100%; padding:14px;
+      border:none; border-radius:14px;
+      background:linear-gradient(135deg,#6d75ff,#5865f2);
+      color:#fff; font-weight:700; font-size:18px;
+      letter-spacing:.5px; cursor:pointer;
+      box-shadow: 0 4px 15px rgba(88,101,242,.4),
+                  0 0 10px rgba(255,255,255,.1),
+                  inset 0 0 5px rgba(255,255,255,.2);
+      transition:all .3s;
     }
-
     button:hover {
-      background: linear-gradient(135deg, #7d89ff, #4e57e0);
-      transform: scale(1.03);
+      background:linear-gradient(135deg,#7d89ff,#4e57e0);
+      box-shadow: 0 6px 22px rgba(88,101,242,.6),
+                  0 0 24px rgba(255,255,255,.2),
+                  inset 0 0 10px rgba(255,255,255,.3);
+      transform:scale(1.03);
+    }
+    button:active {
+      transform:scale(0.96);
+      box-shadow:inset 0 4px 6px rgba(0,0,0,.3);
     }
 
     #log {
-      margin-top: 26px;
-      padding: 14px;
-      background: #202225;
-      border-radius: 10px;
-      font-family: monospace;
-      font-size: 14px;
-      white-space: pre-wrap;
-      height: 140px;
-      overflow-y: auto;
+      margin-top:20px;
+      padding:10px;
+      height:120px;
+      overflow-y:auto;
+      background:#202225;
+      border-radius:10px;
+      font-family:monospace;
+      font-size:12px;
+      white-space:pre-wrap;
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 16px; max-width: 95%; border-radius: 10px; }
+      h2 { font-size: 18px; margin-bottom: 16px; }
+      label { font-size: 13px; margin-top: 12px; }
+      input[type="text"] { padding: 8px; font-size: 12px; }
+      button { padding: 10px; font-size: 16px; width: 100%; margin-top: 12px; }
+      #log { height: 80px; font-size: 11px; }
     }
   </style>
 </head>
@@ -88,18 +101,16 @@
   <div class="card">
     <h2>Ozeu Group Leaver</h2>
     <form id="form">
-      <label>トークン</label>
-      <input id="token" type="text" required>
-
-      <label>グループ名フィルター</label>
-      <input id="filter" type="text">
-
+      <label>トークン
+        <input id="token" type="text">
+      </label>
+      <label>グループ名フィルター
+        <input id="filter" type="text">
+      </label>
       <button type="submit">実行</button>
     </form>
-
     <div id="log"></div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
