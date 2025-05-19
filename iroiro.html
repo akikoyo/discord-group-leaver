@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discord Webhook Info Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c2f33, #23272a);
+      font-family: 'Inter', sans-serif;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 20px;
+    }
+    h1 {
+      color: #7289da;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      max-width: 600px;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #7289da;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #5b6eae;
+    }
+    pre {
+      margin-top: 30px;
+      background: #1e2124;
+      padding: 20px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      width: 100%;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Discord Webhook Info Checker</h1>
+  <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." />
+  <button onclick="checkWebhook()">チェック</button>
+  <pre id="result">ここに結果が表示されます。</pre>
+
+  <script>
+    async function checkWebhook() {
+      const url = document.getElementById('webhookUrl').value.trim();
+      const resultEl = document.getElementById('result');
+      resultEl.textContent = '取得中...';
+
+      if (!url || !url.startsWith('https://discord.com/api/webhooks/')) {
+        resultEl.textContent = '[❌] 正しい Webhook URL を入力してください。';
+        return;
+      }
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          resultEl.textContent = `[❌] ステータス: ${res.status} - Webhookが見つからないか、アクセスできません`;
+          return;
+        }
+
+        const data = await res.json();
+        resultEl.textContent = `✅ Webhook情報:
+
+` +
+          `・名前: ${data.name}
+` +
+          `・ID: ${data.id}
+` +
+          `・タイプ: ${data.type === 1 ? '通常' : 'Slack互換'}
+` +
+          `・チャンネルID: ${data.channel_id}
+` +
+          `・ギルドID: ${data.guild_id}
+` +
+          `・トークン: ${data.token}
+` +
+          `・アバターURL: ${data.avatar ? `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png` : 'なし'}
+` +
+          `・アプリケーションID: ${data.application_id || 'なし'}
+`;
+      } catch (err) {
+        resultEl.textContent = `[❌] エラー: ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
